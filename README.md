@@ -17,3 +17,4 @@
 ## Useful links
 - Gazebo: http://gazebosim.org/tutorials?tut=ros_roslaunch
 - Our google drive folder: https://drive.google.com/drive/u/0/folders/1rULuPJROJ3jGQPqAHAtZ3HEmUaQmIB8A
+- Zoom link: https://utoronto.zoom.us/j/88018824927 Meeting ID: 880 1882 4927 Passcode: 922349 
