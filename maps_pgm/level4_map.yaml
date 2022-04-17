@@ -1,4 +1,4 @@
-image: level1_map.pgm
+image: level4_map.pgm
 resolution: 0.020000
 origin: [-16.250000, -7.500000, 0.000000]
 negate: 0
