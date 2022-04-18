@@ -1,0 +1,119 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+  <!-- The wheels all rotate around their X axis, so for simplicity include a rotated parent link -->
+  <link name="drive_train_link" />
+  <joint name="drive_train_joint" type="fixed">
+    <parent link="chassis_link" />
+    <child link="drive_train_link" />
+    <origin xyz="0 0 0" rpy="0 0 ${pi/2}" />
+  </joint>
+
+  <xacro:macro name="rotacastor" params="name parent *origin">
+    <link name="${name}_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="100"/>
+        <inertia ixx="0.2" ixy="0" ixz="0" iyy="0.2" iyz="0" izz="0.2"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 1.5708 0" />
+        <geometry>
+          <cylinder radius="0.0625" length="0.0827" />
+        </geometry>
+        <material name="Boxer_Black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 1.5708 0" />
+        <geometry>
+          <cylinder radius="0.0625" length="0.0827" />
+        </geometry>
+      </collision>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${name}_link" />
+      <axis  xyz="1 0 0" />
+      <dynamics damping="1.0" />
+    </joint>
+
+    <gazebo reference="${name}_link">
+      <material>Gazebo/DarkGrey</material>
+      <selfCollide>false</selfCollide>
+      <!-- For castors, we need high PID values to avoid slippage -->
+      <kp>100000000.0</kp>
+      <kd>10000.0</kd>
+      <!-- Castors will slide freely to allow turning -->
+      <mu1>0</mu1>
+      <mu2>0</mu2>
+      <minDepth>0.0</minDepth>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="drive_wheel" params="name parent *origin">
+    <link name="${name}_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="100"/>
+        <inertia ixx="0.2" ixy="0" ixz="0" iyy="0.2" iyz="0" izz="0.2"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 1.5708 0" />
+        <geometry>
+          <cylinder radius="0.080" length="0.04" />
+        </geometry>
+        <material name="Boxer_Black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 1.5708 0" />
+        <geometry>
+          <cylinder radius="0.080" length="0.04" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${name}_joint" type="continuous">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${name}_link" />
+      <axis xyz="1 0 0" />
+      <dynamics damping="1.0" />
+    </joint>
+
+    <transmission name="${name}_transmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${name}_joint">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${name}_actuator">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <gazebo reference="${name}_link">
+      <material>Gazebo/Black</material>
+      <selfCollide>false</selfCollide>
+      <!-- For wheels, we need high PID values to avoid slippage -->
+      <kp value="100000000.0" />
+      <kd value="10000.0" />
+      <!-- Wheels have friction to prevent slippage -->
+      <mu1 value="0.1"/>
+      <mu2 value="0.1"/>
+      <minDepth>0.0</minDepth>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:rotacastor name="rotacastor_right" parent="drive_train_link">
+    <origin xyz="-0.1937 -0.2792 0.0347" rpy="0 0 0" />
+  </xacro:rotacastor>
+  <xacro:rotacastor name="rotacastor_left" parent="drive_train_link">
+    <origin xyz="0.1937 -0.2792 0.0347" rpy="0 0 0" />
+  </xacro:rotacastor>
+
+  <xacro:drive_wheel name="wheel_right" parent="drive_train_link">
+    <origin xyz="-0.2436 0.1503 0.0526" rpy="0 0 0" />
+  </xacro:drive_wheel>
+  <xacro:drive_wheel name="wheel_left" parent="drive_train_link">
+    <origin xyz="0.2436 0.1503 0.0526" rpy="0 0 0" />
+  </xacro:drive_wheel>
+</robot>

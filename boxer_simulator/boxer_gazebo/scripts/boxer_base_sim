@@ -1,0 +1,87 @@
+#!/usr/bin/env python2
+"""
+This is a simple ROS node that publishes the Boxer 2.4 joint states
+for use in Gazebo simulations.  This is normally handled by the
+Otto 100 base platform on a physical robot via the ROS2 API and
+ros1_bridge nodes.
+
+For Gazebo we use a DiffDriveController to publish the wheel states
+so this node only has to publish the lift joint (which is currently
+not supported in Noetic, but the joint is present in the URDF for
+future expansion)
+
+
+BSD 3-Clause License
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+ * Neither the name of Clearpath Robotics, Inc. nor the
+   names of its contributors may be used to endorse or promote products
+   derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL CLEARPATH ROBOTICS, INC. BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Please send comments, questions, or patches to code@clearpathrobotics.com
+"""
+
+import rospy
+from geometry_msgs.msg import Twist
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Header
+
+import threading
+
+LIFT_INDEX = 0
+
+class BoxerBaseSim:
+    def __init__(self):
+        self.load_params()
+        self.joint_names = ['lift_joint']
+        self.joint_positions = [0]
+        self.joint_velocities = [0]
+        self.joint_efforts = [0]
+
+    def load_params(self):
+        self.serial_no = rospy.get_param('serial_no', 'A31_0123456789')
+        self.api_version = rospy.get_param('api_version', 'v1_1')
+
+    def start(self):
+        self.joint_state_pub = rospy.Publisher('joint_states', JointState, queue_size = 10)
+        self.joint_state_pub_thread = threading.Thread(target=self.publish_joint_states_thread)
+        self.joint_state_pub_thread.start()
+
+    def publish_joint_states_thread(self):
+        rate = rospy.Rate(10)
+
+        msg = JointState()
+        msg.header = Header()
+
+        while not rospy.is_shutdown():
+            rate.sleep()
+
+            msg.header.stamp = rospy.Time.now()
+            msg.name = self.joint_names
+            msg.position = self.joint_positions
+            msg.effort = self.joint_efforts
+            msg.velocity = self.joint_velocities
+
+            self.joint_state_pub.publish(msg)
+
+if __name__=="__main__":
+    rospy.init_node('boxer_sim_base_node')
+    node = BoxerBaseSim()
+
+    node.start()
+    rospy.spin()

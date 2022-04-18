@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>boxer_desktop</name>
+  <version>0.1.2</version>
+  <description>Packages for working with BOXER from a ROS desktop.</description>
+
+  <maintainer email="civerachb@clearpathrobotics.com">Chris Iverach-Brereton</maintainer>
+  <author email="dniewinski@clearpathrobotics.com">Dave Niewinski</author>
+
+  <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/boxer_desktop</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>boxer_msgs</exec_depend>
+  <exec_depend>boxer_viz</exec_depend>
+
+  <export><metapackage/></export>
+</package>

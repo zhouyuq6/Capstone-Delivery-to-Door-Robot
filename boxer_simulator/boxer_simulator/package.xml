@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>boxer_simulator</name>
+  <version>0.1.1</version>
+  <description>Metapackage encompassing simulation components for BOXER.</description>
+
+  <maintainer email="civerachb@clearpathrobotics.com">Chris Iverach-Brereton</maintainer>
+  <author email="dniewinski@clearpathrobotics.com">Dave Niewinski</author>
+  
+  <license>BSD</license>
+  <url type="website">http://www.clearpathrobotics.com</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>boxer_gazebo</exec_depend>
+
+  <export><metapackage/></export>
+</package>

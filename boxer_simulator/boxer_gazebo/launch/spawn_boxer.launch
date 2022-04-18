@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="robot_namespace" default="/"/>
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.5"/>
+  <arg name="yaw" default="0.0"/>
+
+  <arg name="serial_no"   default="$(optenv ROS_ROBOT_SERIAL_NO A31_0123456789)" />
+  <arg name="api_version" default="$(optenv BOXER_API_VERSION v1_1)" />
+
+  <!-- Launch all nodes within the specified namespace. Prevents node namespace collisions in the multi-robot case -->
+  <group ns="$(arg robot_namespace)">
+
+    <!-- Constants for gazebo_ros_control's internal PID loop that
+     drives the simulated position and velocity controllers. -->
+    <rosparam>
+      gazebo_ros_control:
+        pid_gains:
+          wheel_left_joint: { p: 1.0, i: 0.0, d: 0.0 }
+          wheel_right_joint: { p: 1.0, i: 0.0, d: 0.0 }
+          lift_joint: { p: 100000.0, i: 1000.0, i_clamp: 1000, d: 1000.0 }
+    </rosparam>
+
+    <!-- Load the BOXER description -->
+    <include file="$(find boxer_description)/launch/description.launch">
+      <arg name="robot_namespace" value="$(arg robot_namespace)"/>
+    </include>
+
+    <include file="$(find boxer_control)/launch/control.launch">
+      <arg name="serial_no"   value="$(arg serial_no)" />
+      <arg name="api_version" value="$(arg api_version)" />
+      <arg name="simulation"  value="true" />
+    </include>
+
+    <!-- Spawn the BOXER robot model in Gazebo-->
+    <node name="spawn_boxer" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf
+                -param robot_description
+                -model $(arg robot_namespace)
+                -x $(arg x)
+                -y $(arg y)
+                -z $(arg z)
+                -Y $(arg yaw)" />
+
+    <node name="boxer_sim_base_node" pkg="boxer_gazebo" type="boxer_base_sim">
+      <param name="serial_no"   value="$(arg serial_no)" />
+      <param name="api_version" value="$(arg api_version)" />
+    </node>
+  </group> <!-- End of namespace -->
+</launch>
